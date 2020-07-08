@@ -9,6 +9,8 @@ app.use(bodyParser.urlencoded({ extended: false })); // Parsea lo que venga en e
 app.use(bodyParser.json()); // Parsea lo que enviamos nostotros
 
 // CRUD
+
+/* Get */
 app.get('/', async (req, res) => {
   const { data } = await axios.get(
     'https://jsonplaceholder.typicode.com/users'
@@ -31,19 +33,14 @@ app.post('/', async (req, res) => {
 app.put('/:id', async (req, res) => {
   const { body } = req;
   const { id } = req.params;
-  const { data } = await axios.put(
-    `https://jsonplaceholder.typicode.com/users/${id}`,
-    body
-  );
+  await axios.put(`https://jsonplaceholder.typicode.com/users/${id}`, body);
   res.sendStatus(204);
 });
 
-/* Dlelete */
+/* Delete */
 app.delete('/:id', async (req, res) => {
   const { id } = req.params;
-  const { data } = await axios.delete(
-    `https://jsonplaceholder.typicode.com/users/${id}`
-  );
+  await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`);
   res.sendStatus(204);
 });
 
