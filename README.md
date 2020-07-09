@@ -40,3 +40,15 @@ Este tipo de prueba inicia la aplicación e interactúa con ella. Se utilizan pa
 ## REFACTORING THE CODE
 
 El primer paso es dividir todas las funciones en diferentes archivos. De esta manera, podemos crear un directorio `src` donde poner el controlador de la ruta (los controladores) por ejemplo. Todo se importará y exportará en el archivo index.js con cada uno de los archivos con los controladores deferentes.
+
+## TEST
+
+### Instalar Jest
+
+`npm install -D jest`
+
+### Crear el primer test
+
+Podemos crear un archivo que sea `index.spect.js` donde se contendrá un test.
+
+**La función _describe()_** será la encargada de describir el test. Recibe dos parámetros, el primero es que es lo que se quiere testear y el segundo un callback. Esta función callback será la que contenga el cuerpo del test. En este cuerpo puede haber otros describes:
