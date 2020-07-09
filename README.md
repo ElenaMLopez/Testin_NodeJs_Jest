@@ -49,6 +49,58 @@ El primer paso es dividir todas las funciones en diferentes archivos. De esta ma
 
 ### Crear el primer test
 
-Podemos crear un archivo que sea `index.spect.js` donde se contendrá un test.
+Podemos crear un archivo que sea `index.spect.js` donde se contendrá un test:
 
-**La función _describe()_** será la encargada de describir el test. Recibe dos parámetros, el primero es que es lo que se quiere testear y el segundo un callback. Esta función callback será la que contenga el cuerpo del test. En este cuerpo puede haber otros describes:
+- **La función _describe()_** será la encargada de describir el test. Recibe dos parámetros, el primero es que es lo que se quiere testear y el segundo un callback. Esta función callback será la que contenga el cuerpo del test. En este cuerpo puede haber otros describes:
+
+```js
+describe('Prueba', () => {
+  // tests...
+});
+```
+
+- La función iniciada en el primer `decribe` puede tener así mismo otros `describe` dentro. En este caso de test dummie vamos a meter un describe de una función que sume dos números:
+
+```js
+describe('Prueba', () => {
+  describe('suma', () => {
+    // Tests
+  });
+});
+```
+
+- Para definir lo que hace el test se utiliza la palabre reservada `it`. _it_ es una función que recibe dos parámetros también, siendo el primero la descripción de lo que hace el test, en nuestro duumie-test será sumar dos números. Se crea la función que suma dos números y devuelve esta suma.
+
+```js
+describe('Prueba', () => {
+  describe('suma', () => {
+    it('suma dos números', () => {
+      const suma = (a, b) => {
+        return a + b;
+      };
+      // comprobación del 'it'
+    });
+  });
+});
+```
+
+- La palabra reservada para archivos spect, nos provee de una encadenación de metodos que nos ayuda a comprobar si lo que nos devuelve la funcionalidad es lo que esperamos o no. esta palabra es `spect` y en realidad es un método al que se pueden encadenar otros que van realizando las comprobaciones que le digamos, en este caso se usan valores ya:
+
+```js
+describe('Prueba', () => {
+  describe('suma', () => {
+    it('suma dos números', () => {
+      const suma = (a, b) => {
+        return a + b;
+      };
+      expect(suma(1, 2)).toEqual(3);
+    });
+  });
+});
+```
+
+- **_toEqual_ es el método** que nos proporciona Jest para confirmar si lo que devuelve la función llamada con parámetros dentro del _spect_ es realmente lo que debería.
+
+Hay dos formas de lanzar los test, o bien con el comando `npm run test` si se ha modificado el package.json o bien con la funcionalidad de watcher con el comando de Jest `npm run test --wacthAll` .
+
+### Testeando los _handlers_
