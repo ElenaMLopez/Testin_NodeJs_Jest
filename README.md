@@ -103,4 +103,185 @@ describe('Prueba', () => {
 
 Hay dos formas de lanzar los test, o bien con el comando `npm run test` si se ha modificado el package.json o bien con la funcionalidad de watcher con el comando de Jest `npm run test --wacthAll` .
 
-### Testeando los _handlers_
+### Testeando los _handlers_ (test con mocks e inyección de dependencias)
+
+Haciendo un console.log de axios podemos ver en la consola todos los métodos que nos proporciona un mock de Jest:
+
+```bash
+   { [Function: mockConstructor]
+        _isMockFunction: true,
+        getMockImplementation: [Function],
+        mock: [Getter/Setter],
+        mockClear: [Function],
+        mockReset: [Function],
+        mockRestore: [Function],
+        mockReturnValueOnce: [Function],
+        mockResolvedValueOnce: [Function],
+        mockRejectedValueOnce: [Function],
+        mockReturnValue: [Function],
+        mockResolvedValue: [Function],
+        mockRejectedValue: [Function],
+        mockImplementationOnce: [Function],
+        mockImplementation: [Function],
+        mockReturnThis: [Function],
+        mockName: [Function],
+        getMockName: [Function] }
+```
+
+Vamos a testear los endpoints y sus handlers.
+
+- Lo primero es definir un describe (que nos dice que es lo que se pretende testear). El primer parámetro nos indica que es lo que se testea y el segundo es una función en la que se irán realizando los diferentes test para estos endpoits y los métodos (CRUD) que los usan. En este caso es el endpoint de users, así que metemos otro describe dentro para 'users'. Y a continuación ya podemos empezar con el CRUD de users.
+- El primer método va a ser el **get** del CRUD:
+
+```js
+describe('Endpoints', () => {
+  describe('users', () => {
+    describe('get', () => {
+      it('return a user in a json', async () => {
+        /* mock de axios: jest.fn() de esta forma inyectamos una dependencia y la mockeamos. 
+        Si tuviesemos otra como jwt o lo que sea habría que mockearla también */
+        const axios = {
+          get: jest.fn().mockResolvedValue({ data: 1 }),
+          /** Este mock, devuelve un valor que luego se pasa a send en nuestro
+           * get. El valor de { data } no es relevante en realidad aquí y podemos usar 1.
+           * Lo relevante es que reciba lo que reciba tiene que mandarlo.
+           */
+        };
+        // Mock para los métodos de status y send
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          send: jest.fn(),
+        };
+        await handlers({ axios }).get({}, res);
+        // console.log(axios);
+        // res.status.mock.calls retorna un array con los argumentos pasados en status, ok es [200]
+        expect(axios.get.mock.calls).toEqual([
+          ['https://jsonplaceholder.typicode.com/users'],
+        ]);
+        expect(res.send.mock.calls).toEqual([[1]]);
+      });
+    });
+  });
+});
+```
+
+NOTA: podemos ver que es lo que tiene una dependencia mockeada, como es axios en este caso. Haciendo un console.log de axios podemos ver en la consola todos los métodos que nos proporciona un mock de Jest:
+
+```bash
+   { [Function: mockConstructor]
+        _isMockFunction: true,
+        getMockImplementation: [Function],
+        mock: [Getter/Setter],
+        mockClear: [Function],
+        mockReset: [Function],
+        mockRestore: [Function],
+        mockReturnValueOnce: [Function],
+        mockResolvedValueOnce: [Function],
+        mockRejectedValueOnce: [Function],
+        mockReturnValue: [Function],
+        mockResolvedValue: [Function],
+        mockRejectedValue: [Function],
+        mockImplementationOnce: [Function],
+        mockImplementation: [Function],
+        mockReturnThis: [Function],
+        mockName: [Function],
+        getMockName: [Function] }
+```
+
+- Después testearemos el **post**, para este caso necesitamos enviar un _body_ y por ello también ha de ser mockeado. Así, justo después del test del 'get' y sin salirnos de la función del testeo del CRUD de users, pondremos:
+
+```js
+describe('post', () => {
+  describe('create a user', () => {
+    it('post a user', async () => {
+      const axios = {
+        post: jest.fn().mockResolvedValue({ data: 1 }),
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+      const req = {
+        // Mock del parámetro req, que es lo que se envía
+        body: 'request body',
+      };
+      await handlers({ axios }).post(req, res);
+
+      expect(res.status.mock.calls).toEqual([[201]]);
+      expect(res.send.mock.calls).toEqual([[1]]);
+      /* En este caso se comprueba que la url es la correcta, 
+          y que el body (sea el valor que sea), se envía. Y de hecho lo que se está testeando es axios, 
+          es decir, que axios envía a una url determinada lo que tenga en su req.body */
+      expect(axios.post.mock.calls).toEqual([
+        ['https://jsonplaceholder.typicode.com/users', 'request body'],
+      ]);
+    });
+  });
+});
+```
+
+- Tras esto es el turno del **put** de usuarios. En este caso la particularidad es que se ha de enviar un req.body y un id de usuario, así que ha de ser mockeado tambien. Es importante tener en cuenta, que en este caso lo que queremos es confirmar que la url se compone con un id que se pasa, así que en vez de pasar este id con lo que supuestamente vale (req.id) vamos a darle un valor fijo. Se testea que la url está bien compuesta y envía lo que se solicita. De no hacerlo así, es decir, dejar que se evalúe el id llamando a req.id, podría haber algún error anterior que no tenemos controlado, y fallar el test sin que esté realmente fallando la funcionalidad concreta que se analiza.
+
+```js
+describe('put', () => {
+  it('update resources', async () => {
+    const axios = {
+      put: jest.fn().mockResolvedValue({ data: 1 }),
+    };
+    const req = {
+      body: 'request body',
+      params: {
+        id: 12,
+      },
+    };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      sendStatus: jest.fn(),
+    };
+    await handlers({ axios }).put(req, res);
+    expect(res.sendStatus.mock.calls).toEqual([[204]]);
+    expect(axios.put.mock.calls).toEqual([
+      ['https://jsonplaceholder.typicode.com/users/12', 'request body'],
+    ]);
+  });
+});
+```
+
+- Por último nos queda probar el **delete**, en este caso no hay body, pero si hay id, así que es más o menos igual que antes:
+
+```js
+describe('delete', () => {
+      describe('delete a resource', () => {
+        it('should delete a user', async () => {
+          const axios = {
+            delete: jest.fn().mockResolvedValue({ data: 1 }),
+          };
+          const req = {
+            params: {
+              id: 12,
+            },
+          };
+          const res = {
+            sendStatus: jest.fn(),
+          };
+          await handlers({ axios }).delete(req, res);
+          expect(axios.delete.mock.calls).toEqual([
+            ['https://jsonplaceholder.typicode.com/users/12'],
+          ]);
+          expect(res.sendStatus.mock.calls).toEqual([[204]]);
+        });
+      });
+```
+
+Hasta ahora se han definido los métodos de un CRUD básico, y luego se han realizado los test, pero en realidad lo ideal es hacer justo lo contrario. Ver que hay que hacer, realizar el test primero y luego contruir el código en base a esos test. El TDD es la forma más segura de desarrollo.
+
+## TDD
+
+### Hagamos un blog
+
+Nuestro blog tiene los siguientes requisitos (negocio):
+
+- El blog será sólo para administradores.
+- se pueden crear entradas a nombre de otro usuario.
+- si el usuario no exixte debe arrojar error!
+- El usuario debe venir en el body.
