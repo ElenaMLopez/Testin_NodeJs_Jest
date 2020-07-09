@@ -1,38 +1,42 @@
-Install all dependencies: jest, express, axios and nodemor for hot reload.
+Tienes que instalar todas las dependencias: jest, express, axios y nodemor para la recarga en caliente.
 
-Use the start server example in expresss for a ['Hello World'](https://expressjs.com/es/starter/hello-world.html)
+Para empezar, utiliza el ejemplo del servidor de inicio en expresss para un ['Hello World'](https://expressjs.com/es/starter/hello-world.html)
 
-Run the server with nodemon. I just edit the package.json with this scrip:
+Ejecuta el servidor con nodemon. Acabo de editar el package.json con este script:
 
 ```js
     "scripts": {
-    "serve": "nodemon ./index.js",
+    "serve": "nodemon ./server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 ```
 
-We are goint to use this JSONplaceholder url: `https://jsonplaceholder.typicode.com/users`
+Vamos a utilizar esta URL de JSONplaceholder: `https: // jsonplaceholder.typicode.com /users` para hacer una llamada desde nuestra API y obtener los usuarios.
 
 ## UNIT TEST
 
-Just test a particular functionality, a code unit. In this way isn't a test for API calls or database connections or interactions.
+Simplemente prueba una funcionalidad particular, una unidad de código. De esta manera, no es una prueba para llamadas API o conexiones o interacciones de bases de datos.
 
-With this kind of test, we can't test for example, if an array is done correctly, or if really isn't empty, etc.
+Con este tipo de prueba, podemos probar, por ejemplo, si una matriz (array) se realiza correctamente, o si realmente no está vacía, etc.
 
 ## INTEGRATION TEST
 
-Here we have the API calls, test if we have a correct response, for example, in that way we can test fluxes completely.
+Aquí tenemos las llamadas a la API, prueba si tenemos una respuesta correcta, por ejemplo. Los test de integración prueban entonces los flujos por completo.
 
 ## E2E TEST
 
-This kind of test start the apliction and interact with it. They are used to test the user's interfaces.
+Este tipo de prueba inicia la aplicación e interactúa con ella. Se utilizan para probar las interfaces del usuario.
 
-## TEST CONCEPTS:
+## CONCEPTOS DEL TESTING:
 
-- **Spy, stub & mock**: This concepts appear with a test library called Sinon. Spy is a function that we can ask how many times was called and with which arguments. Stub is similar to Spy, but we can tell what behaviour must have, like return and object with a user, at the moment that have been called. Mock is a part of code that's implements the same that others, but we can tell what to use.
-- **Mock**: Everything are mocks in Jest, so we have in this entity all the concepts before.
-- **Module pattern**: We are going to use this kind of pattern. Everything will be in a module.
+- **Spy, stub & mock**: estos conceptos aparecen con una biblioteca de prueba llamada [Sinon](). Spy es una función que podemos preguntar cuántas veces se llamó y con qué argumentos. Stub es similar a Spy, pero podemos decir qué comportamiento debe tener, como devolver y objetar con un usuario, en el momento en que se ha llamado. Mock es una parte del código que implementa lo mismo que otros, pero podemos decir qué usar.
+- **Mock**: Todo es simulacro (_Mock_) en Jest, por lo que tenemos en esta entidad todos los conceptos anteriores.
+- **Module pattern**: vamos a utilizar este tipo de patrón, [patrón módulo](https://medium.com/@gloriafercu/el-patr%C3%B3n-m%C3%B3dulo-en-javascript-1cd012a30ad). Todo estará en un módulo.
 - **Dependency injection**: We can inject axios for example, by mocks (is just an argument)
-- **Efects!**: don make API calls, don't test database connection. Just functionality
+- **Efects!**: no haga llamadas API, no pruebe la conexión de la base de datos. Solo funcionalidad
 
 ---
+
+## REFACTORING THE CODE
+
+El primer paso es dividir todas las funciones en diferentes archivos. De esta manera, podemos crear un directorio `src` donde poner el controlador de la ruta (los controladores) por ejemplo. Todo se importará y exportará en el archivo index.js con cada uno de los archivos con los controladores deferentes.
